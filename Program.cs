@@ -6,28 +6,26 @@ using System;
 
 namespace Exercise2_AutomationCSharp
 {
-    class Program
+
+    class FacebookTesting
     {
-        //Exercise 2
-        IWebDriver driver;
-        public IWebDriver SetUpDriver() {
-            driver = new ChromeDriver(@"C:\Webdrivers\");
-            driver.Manage().Window.Maximize();
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(15);
-            return driver;
-        }
-        #region Interactive Methods
         #region WebElements
-        By CreateAccountFB = By.XPath("//a[@id='u_0_2']");
-        By FirstName = By.XPath("//input[@name='firstname']");
-        By LastName = By.XPath("//input[@name='lastname']");
-        By Number = By.XPath("//input[@name='reg_email__']");
-        By Password = By.XPath("//input[@name='reg_passwd__']");
-        By MonthPick = By.XPath("//select[@id='month']");
-        By DayPick = By.XPath("//select[@id='day']");
-        By YearPick = By.XPath("//select[@id='year']");
-        By FemaleGenderRbtn = By.XPath("//label[contains(text(),'Female')]");
+        public By CreateAccountFB { get; set; }
+        public By FirstName { get; set; }
+        public By LastName { get; set; }
+        public By Number { get; set; }
+        public By Password { get; set; }
+        public By MonthPick { get; set; }
+        public By DayPick { get; set; }
+        public By YearPick { get; set; }
+        public By FemaleGenderRbtn { get; set; }
+        public By FBConnectText { get; set; }
         #endregion
+        public IWebDriver driver;
+        public IWebElement element;
+        Program program = new Program();
+        //Browser = program.SetUpDriver();
+        #region Interactive Methods
         public void Click(IWebElement element) {
             element.Click();
         }
@@ -35,30 +33,65 @@ namespace Exercise2_AutomationCSharp
             element.SendKeys(value);
         }
         #endregion
+
+        public IWebDriver SetUpDriver() {
+            driver = new ChromeDriver(@"C:\Webdrivers\");
+            driver.Manage().Window.Maximize();
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(15);
+            CreateAccountFB = By.XPath("//a[@id='u_0_2']");
+            FirstName = By.XPath("//input[@name='firstname']");
+            LastName = By.XPath("//input[@name='lastname']");
+            Number = By.XPath("//input[@name='reg_email__']");
+            Password = By.XPath("//input[@name='reg_passwd__']");
+            MonthPick = By.XPath("//select[@id='month']");
+            DayPick = By.XPath("//select[@id='day']");
+            YearPick = By.XPath("//select[@id='year']");
+            FemaleGenderRbtn = By.XPath("//label[contains(text(),'Female')]");
+            FBConnectText = By.XPath("//h2[contains(text(),'Connect with friends and the world around you on F')]");
+            return driver;
+        }
+
+    }
+    class Program
+    {
+        //Exercise 2
+        IWebDriver driver;
         static void Main(string[] args) {
-            IWebDriver Browser;
-            IWebElement element;
-            Program program = new Program();
-            Browser = program.SetUpDriver();
+            FacebookTesting FBTesting = new FacebookTesting();
+            FBTesting.SetUpDriver();
             //Go to facebook.com.
-            Browser.Url = "https://www.facebook.com";
+            FBTesting.driver.Url = "https://www.facebook.com";
             //Validate the Title of the page, should be : Facebook - Log In or Sign Up.
-            Assert.AreEqual(Browser.Title, "Facebook - Log In or Sign Up");
+            Assert.AreEqual(FBTesting.driver.Title, "Facebook - Log In or Sign Up");
+            
             //Fill all Sign Up section.
-            program.Click(Browser.FindElement(program.CreateAccountFB));
-            program.SendText(Browser.FindElement(program.FirstName), "TestName");
-            program.SendText(Browser.FindElement(program.LastName), "TestLastName");
-            program.SendText(Browser.FindElement(program.Number), "4771234567");
-            program.SendText(Browser.FindElement(program.Password), "Password01!");
+            WebDriverWait wait = new WebDriverWait(FBTesting.driver, TimeSpan.FromSeconds(10.0));
+            wait.Until(ExpectedConditions.ElementToBeClickable(FBTesting.CreateAccountFB));
+            FBTesting.Click(FBTesting.driver.FindElement(FBTesting.CreateAccountFB));
+            wait.Until(ExpectedConditions.ElementToBeClickable(FBTesting.FirstName));
+            FBTesting.SendText(FBTesting.driver.FindElement(FBTesting.FirstName), "TestName");
+            wait.Until(ExpectedConditions.ElementToBeClickable(FBTesting.LastName));
+            FBTesting.SendText(FBTesting.driver.FindElement(FBTesting.LastName), "TestLastName");
+            wait.Until(ExpectedConditions.ElementToBeClickable(FBTesting.Number));
+            FBTesting.SendText(FBTesting.driver.FindElement(FBTesting.Number), "4771234567");
+            wait.Until(ExpectedConditions.ElementToBeClickable(FBTesting.Password));
+            FBTesting.SendText(FBTesting.driver.FindElement(FBTesting.Password), "Password01!");
             //Choose a different Birthday not the default one.
-            var selectElement = new SelectElement(Browser.FindElement(program.MonthPick));
+            wait.Until(ExpectedConditions.ElementToBeClickable(FBTesting.MonthPick));
+            var selectElement = new SelectElement(FBTesting.driver.FindElement(FBTesting.MonthPick));
             selectElement.SelectByText("Jan");
-            selectElement = new SelectElement(Browser.FindElement(program.DayPick));
+            wait.Until(ExpectedConditions.ElementToBeClickable(FBTesting.DayPick));
+            selectElement = new SelectElement(FBTesting.driver.FindElement(FBTesting.DayPick));
             selectElement.SelectByText("1");
-            selectElement = new SelectElement(Browser.FindElement(program.YearPick));
+            wait.Until(ExpectedConditions.ElementToBeClickable(FBTesting.YearPick));
+            selectElement = new SelectElement(FBTesting.driver.FindElement(FBTesting.YearPick));
             selectElement.SelectByText("1996");
             //Click on Female.
-            program.Click(Browser.FindElement(program.FemaleGenderRbtn));
+            wait.Until(ExpectedConditions.ElementToBeClickable(FBTesting.FemaleGenderRbtn));
+            FBTesting.Click(FBTesting.driver.FindElement(FBTesting.FemaleGenderRbtn));
+
+            //Validate following text is present: Connect with friends and the world around you on Facebook.
+            Assert.IsNotNull(FBTesting.driver.FindElement(FBTesting.FBConnectText));
         }
     }
 }
